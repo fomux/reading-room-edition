@@ -11,9 +11,9 @@ const button = document.querySelector('button');
 const status = document.querySelector('[role=status]');
 const wrapped = Uint8Array.from(atob('5CEZfxfMn36Luz3wJNrAG1GvHWk5EfAEtx0XLICtAJUa2/rbZvEU0xAZN4eP9vVjVOODvRqr6IKSMYE9e14YRrADqJsWtsO3HC53ZA=='), c => c.charCodeAt(0));
 function readerEdition(html) {
-  const marker = '<script id="book-data" type="application/json">';
+  const marker = '\x3cscript id="book-data" type="application/json">';
   const start = html.indexOf(marker) + marker.length;
-  const end = html.indexOf('</script>', start);
+  const end = html.indexOf('\x3c/script>', start);
   const pages = JSON.parse(html.slice(start, end));
   const proposal = pages.find(page => page.id === 'proposal');
   if (!proposal) throw Error('Unexpected edition');
@@ -48,8 +48,9 @@ form.addEventListener('submit', async event => {
     input.value = '';
     const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
     const html = readerEdition(await new Response(stream).text());
-    const url = URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
-    location.replace(url + location.hash);
+    document.open();
+    document.write(html);
+    document.close();
   } catch (error) {
     status.textContent = error.name === 'OperationError' ? 'Неверный пароль' : 'Не удалось продолжить. Попробуйте ещё раз.';
     button.disabled = false;
