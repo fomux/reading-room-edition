@@ -10,6 +10,25 @@ const input = document.querySelector('input');
 const button = document.querySelector('button');
 const status = document.querySelector('[role=status]');
 const wrapped = Uint8Array.from(atob('5CEZfxfMn36Luz3wJNrAG1GvHWk5EfAEtx0XLICtAJUa2/rbZvEU0xAZN4eP9vVjVOODvRqr6IKSMYE9e14YRrADqJsWtsO3HC53ZA=='), c => c.charCodeAt(0));
+function readerEdition(html) {
+  const marker = '<script id="book-data" type="application/json">';
+  const start = html.indexOf(marker) + marker.length;
+  const end = html.indexOf('</script>', start);
+  const pages = JSON.parse(html.slice(start, end));
+  const proposal = pages.find(page => page.id === 'proposal');
+  if (!proposal) throw Error('Unexpected edition');
+  pages[pages.indexOf(proposal)] = {id:'proposal',title:'В разработке',group:'Предложения',lead:'',html:'',toc:[]};
+  for (const page of pages) {
+    page.html = page.html
+      .replace(/<section class="section-brief" id="start--brief-proposal">[\s\S]*?<\/section>/g, '')
+      .replace(/<a href="#proposal">[^<]*<\/a>/g, 'в разработке');
+  }
+  const data = JSON.stringify(pages).replace(/<\//g, '<\\/');
+  return (html.slice(0,start) + data + html.slice(end))
+    .replace("!p.id.startsWith('raw-')&&!versions", "p.id!=='proposal'&&!p.id.startsWith('raw-')&&!versions")
+    .replace(' const info=groupInfo[group],block=', ' if(!primary.some(p=>p.group===group))continue;\n const info=groupInfo[group],block=')
+    .replace('for(const p of pages){\n const d=', "for(const p of pages){\n if(p.id==='proposal')continue;\n const d=");
+}
 async function decrypt(payload, password) {
   const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
   const key = await crypto.subtle.deriveKey({name:'PBKDF2',salt:payload.slice(0,16),iterations:600000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['decrypt']);
@@ -28,7 +47,9 @@ form.addEventListener('submit', async event => {
     const compressed = await decrypt(payload,new TextDecoder().decode(unlocked)).catch(() => decrypt(payload,password));
     input.value = '';
     const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
-    location.replace(URL.createObjectURL(await new Response(stream,{headers:{'Content-Type':'text/html;charset=utf-8'}}).blob()));
+    const html = readerEdition(await new Response(stream).text());
+    const url = URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+    location.replace(url + location.hash);
   } catch (error) {
     status.textContent = error.name === 'OperationError' ? 'Неверный пароль' : 'Не удалось продолжить. Попробуйте ещё раз.';
     button.disabled = false;
