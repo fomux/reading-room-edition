@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Reading Room</title>
+<style>
+body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#f5f5f1;color:#192333;font:1rem system-ui}
+main{box-sizing:border-box;width:min(92vw,25rem);padding:2rem;border:1px solid #d8dedb;border-radius:1.25rem;background:white}
+h1{margin:0 0 1.5rem;font-size:1.65rem}label,input,button{display:block}input,button{box-sizing:border-box;width:100%;padding:.8rem;margin-top:.6rem;border-radius:.6rem;font:inherit}input{border:1px solid #68727b}button{border:0;background:#233e36;color:white;font-weight:600;cursor:pointer}p{margin-bottom:0}
+</style>
+<main>
+<h1>Reading Room</h1>
+<form>
+<label for="password">Пароль доступа</label>
+<input id="password" type="password" autocomplete="current-password" required>
+<button>Открыть книгу</button>
+<p role="status"></p>
+</form>
+</main>
+<script type="module">
+const form = document.querySelector('form');
+const input = document.querySelector('input');
+const button = document.querySelector('button');
+const status = document.querySelector('[role=status]');
+let envelope;
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  button.disabled = true;
+  status.textContent = 'Открываем книгу…';
+  try {
+    if (!envelope) {
+      const response = await fetch('./edition.bin');
+      if (!response.ok) throw new Error('Download failed');
+      envelope = new Uint8Array(await response.arrayBuffer());
+    }
+    const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(input.value.trim()), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey(
+      {name:'PBKDF2',salt:envelope.slice(0,16),iterations:600000,hash:'SHA-256'},
+      material,{name:'AES-GCM',length:256},false,['decrypt']);
+    const compressed = await crypto.subtle.decrypt({name:'AES-GCM',iv:envelope.slice(16,28)},key,envelope.slice(28));
+    const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const html = await new Response(stream).text();
+    input.value = '';
+    location.replace(URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'})));
+  } catch (error) {
+    status.textContent = error.name === 'OperationError' ? 'Пароль не подошёл.' : 'Книга пока недоступна. Попробуйте ещё раз.';
+    button.disabled = false;
+    input.focus();
+  }
+});
+</script>
+</html>
