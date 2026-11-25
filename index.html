@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>Reading Room</title>
 <style>body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#f5f5f1;color:#192333;font:1rem system-ui}main{box-sizing:border-box;width:min(92vw,25rem);padding:2rem;border:1px solid #d8dedb;border-radius:1.25rem;background:white}input,button{display:block;box-sizing:border-box;width:100%;padding:.8rem;margin-top:.6rem;border-radius:.6rem;font:inherit}button{background:#233e36;color:white;border:0;cursor:pointer}</style>
-<main><h1>Reading Room</h1><form><label for="password">Пароль доступа</label><input id="password" type="password" autocomplete="off" required><button>Открыть книгу</button><p role="status" aria-live="polite"></p></form></main>
+<main><h1>Reading Room</h1><form><label for="password">Пароль доступа</label><input id="password" type="text" inputmode="text" lang="ru" spellcheck="false" autocorrect="off" autocapitalize="none" autocomplete="off" required><button>Открыть книгу</button><p role="status" aria-live="polite"></p></form></main>
 <script type="module">
 const form = document.querySelector('form');
 const input = document.querySelector('input');
