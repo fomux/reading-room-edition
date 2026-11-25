@@ -27,6 +27,7 @@ function readerEdition(html) {
   return (html.slice(0,start) + data + html.slice(end))
     .replace("!p.id.startsWith('raw-')&&!versions", "p.id!=='proposal'&&!p.id.startsWith('raw-')&&!versions")
     .replace(' const info=groupInfo[group],block=', ' if(!primary.some(p=>p.group===group))continue;\n const info=groupInfo[group],block=')
+    .replace("reader.querySelector('.content').before(context);", "reader.querySelector('.content').before(context);\n  const marks = [...reader.querySelectorAll('mark.search-hit')];\n  const clearHighlights = () => {\n   clearTimeout(highlightTimer);\n   for (const mark of marks) mark.replaceWith(...mark.childNodes);\n   context.remove();\n  };\n  const highlightTimer = setTimeout(clearHighlights, 8000);\n  for (const mark of marks) mark.addEventListener('click', clearHighlights, {once:true});\n  context.querySelector('button').addEventListener('click', event => {\n   event.stopPropagation();\n   clearHighlights();\n  });")
     .replace('for(const p of pages){\n const d=', "for(const p of pages){\n if(p.id==='proposal')continue;\n const d=");
 }
 async function decrypt(payload, password) {
