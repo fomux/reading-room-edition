@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>Доступ</title>
+<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><meta name="referrer" content="no-referrer"><title>Страница</title>
 <style>
-:root{color-scheme:light;--ink:#24313c;--accent:#3d5458;--border:#c5cece}*{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:24px;background:#edf0ef;color:var(--ink);font:16px/1.5 system-ui,sans-serif}.panel{width:min(100%,420px);padding:clamp(24px,7vw,44px);background:#fcfdfc;border:1px solid #d7dfdc;border-radius:18px;box-shadow:0 10px 38px #23332c0d}h1{margin:0 0 25px;font:650 clamp(1.55rem,5vw,2rem)/1.15 system-ui,sans-serif;letter-spacing:-.045em}label{display:block;margin-bottom:7px;font-size:.925rem;color:#4a5b60;font-weight:550}input,button{width:100%;min-height:48px;border-radius:8px;font:inherit}input{padding:.65rem .8rem;background:white;color:var(--ink);border:1px solid var(--border)}button{margin-top:14px;padding:.65rem 1rem;border:0;background:var(--accent);color:white;font-weight:600;cursor:pointer}button:hover{background:#304649}button:disabled{opacity:.72;cursor:wait}:focus-visible{outline:3px solid #789899;outline-offset:3px}[role=status]{margin:.75rem 0 0;color:#814b42;font-size:.9rem}[role=status]:empty{display:none}
+:root{color-scheme:light;--ink:#24313c;--accent:#3d5458;--border:#c5cece}*{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:24px;background:#edf0ef;color:var(--ink);font:16px/1.5 system-ui,sans-serif}.panel{width:min(100%,420px);padding:clamp(24px,7vw,44px);background:#fcfdfc;border:1px solid #d7dfdc;border-radius:18px;box-shadow:0 10px 38px #23332c0d}input,button{width:100%;min-height:48px;border-radius:8px;font:inherit}input{padding:.65rem .8rem;background:white;color:var(--ink);border:1px solid var(--border)}button{margin-top:14px;padding:.65rem 1rem;border:0;background:var(--accent);color:white;font-weight:600;cursor:pointer}button:hover{background:#304649}button:disabled{opacity:.72;cursor:wait}:focus-visible{outline:3px solid #789899;outline-offset:3px}[role=status]{margin:.75rem 0 0;color:#814b42;font-size:.9rem}[role=status]:empty{display:none}
 </style>
-<main class="panel"><h1>Доступ</h1><form><label for="password">Код доступа</label><input id="password" type="text" inputmode="text" lang="ru" spellcheck="false" autocorrect="off" autocapitalize="none" autocomplete="off" required><button type="submit">Продолжить</button><p role="status" aria-live="polite"></p></form></main>
+<main class="panel"><form><input aria-label="Пароль" id="password" type="text" inputmode="text" lang="ru" spellcheck="false" autocorrect="off" autocapitalize="none" autocomplete="off" required><button type="submit">Продолжить</button><p role="status" aria-live="polite"></p></form></main>
 <script type="module">
 const form = document.querySelector('form');
 const input = document.querySelector('input');
@@ -30,7 +30,7 @@ form.addEventListener('submit', async event => {
     const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
     location.replace(URL.createObjectURL(await new Response(stream,{headers:{'Content-Type':'text/html;charset=utf-8'}}).blob()));
   } catch (error) {
-    status.textContent = error.name === 'OperationError' ? 'Код не подошёл.' : 'Не удалось продолжить. Попробуйте ещё раз.';
+    status.textContent = error.name === 'OperationError' ? 'Неверный пароль' : 'Не удалось продолжить. Попробуйте ещё раз.';
     button.disabled = false;
   }
 });
